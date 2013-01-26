@@ -3,29 +3,135 @@ package main
 import (
 	"fmt"
 	"os"
+	"bufio"
+	"strconv"
+	"strings"
 )
 
+func bye(format string, v ...interface{}) {
+	fmt.Fprintf(os.Stderr, format, v...)
+	os.Exit(1)
+}
+
 func accept() {
+	var selection int
+	var tryBranchName, branchName string
+
+	fmt.Printf("Fetching story list...")
+	stories := pt.AcceptableStories()
+	fmt.Printf("done\n")
+
+	if len(stories) == 0 {
+		bye("No stories to accept!\n")
+	}
+
+	colors := map[string]int{
+		"bug": 91,
+		"feature": 92,
+	}
+	for i := range stories {
+		fmt.Printf("% 3d \033[%dm%s\033[0m (%d pts)\n",
+			i, colors[stories[i].Type],
+			stories[i].Name, stories[i].Estimate)
+	}
+
+	fmt.Printf("Please choose your story number [0]: ")
+	fmt.Scanf("%d", &selection)
+
+	if selection >= len(stories) || selection < 0 {
+		accept()
+		return
+	}
+
+	fmt.Printf("Accepting story...")
+	pt.AcceptStory(stories[selection].ID)
+	fmt.Printf("done\n")
+
+	tryBranchName = strings.ToLower(stories[selection].Name)
+	tryBranchName = strings.TrimSpace(tryBranchName)
+	tryBranchName = strings.Replace(tryBranchName, " ", "_", -1)
+
+	fmt.Printf("New branch name [%s]: ", tryBranchName)
+	in := bufio.NewReader(os.Stdin)
+	branchName, _ = in.ReadString('\n')
+	branchName = strings.TrimSpace(branchName)
+
+	if branchName == "" {
+		branchName = tryBranchName
+	} else {
+		branchName = strings.ToLower(branchName)
+		branchName = strings.Replace(branchName, " ", "_", -1)
+	}
+
+	branchName = fmt.Sprintf("%s_%d", branchName, stories[selection].ID)
+
+	fmt.Printf("Creating branch %s from default...\n", branchName)
+	hgUpdate("default")
+	hgNewBranch(branchName)
+	hgCommit(fmt.Sprintf(generalConfig.NewBranchCommitMsg,
+		stories[selection].ID))
+	fmt.Printf("Pushing upstream...\n%s\n", hgPushNewBranch())
 }
 
 func deliver() {
+	currentBranch := hgBranch()
+	currentBranchItems := strings.Split(currentBranch, "_")
+	currentStory, err := strconv.Atoi(currentBranchItems[len(currentBranchItems) - 1])
+
+	if err != nil || currentStory == 0 {
+		bye("This doesn't seem to be a story branch\n")
+	}
+
+	fmt.Printf("Delivering story %d...", currentStory)
+	pt.DeliverStory(currentStory)
+	fmt.Printf("done\n")
+
+	fmt.Printf("Merging to branch %s...\n", repositoryConfig.StagingBranch)
+	hgUpdate(repositoryConfig.StagingBranch)
+	hgMerge(currentBranch)
+	hgCommit(fmt.Sprintf(generalConfig.DeliverCommitMsg,
+		currentStory))
+	fmt.Printf("Pushing upstream...\n%s\n", hgPush())
 }
 
 func done() {
+	currentBranch := hgBranch()
+	currentBranchItems := strings.Split(currentBranch, "_")
+	currentStory, err := strconv.Atoi(currentBranchItems[len(currentBranchItems) - 1])
+
+	if err != nil || currentStory == 0 {
+		bye("This doesn't seem to be a story branch\n")
+	}
+
+	fmt.Printf("Adding label...\n")
+	if pt.DoneStory(currentStory) {
+		fmt.Printf("Merging to branch default...\n")
+		hgUpdate("default")
+		hgMerge(currentBranch)
+		hgCommit(fmt.Sprintf(generalConfig.DoneCommitMsg,
+			currentStory))
+		fmt.Printf("Pushing upstream...\n%s\n", hgPush())
+	} else {
+		bye("This story isn't accepted yet!")
+	}
+}
+
+func usage() {
+	bye("Usage: %s [accept|deliver|done]\n", os.Args[0])
 }
 
 func main() {
+	initConfig()
+	initPivotalTracker()
+
 	if len(os.Args) < 2 {
-		fmt.Println("Missing argument")
-		os.Exit(1)
+		usage()
 	}
 
 	switch os.Args[1] {
 	case "accept": accept()
 	case "deliver": deliver()
 	case "done": done()
-	default:
-		fmt.Printf("Wrong argument\nUsage: %s [accept|deliver|done]\n", os.Args[0])
-		os.Exit(1)
+	default: usage()
 	}
 }
