@@ -1,9 +1,9 @@
 package main
 
 import (
-	"os"
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"path"
 )
 
@@ -12,15 +12,15 @@ const (
 )
 
 var generalConfig struct {
-	Token string
+	Token              string
 	NewBranchCommitMsg string
-	DeliverCommitMsg string
-	DoneCommitMsg string
-	DoneLabel string
-	Name string
+	DeliverCommitMsg   string
+	DoneCommitMsg      string
+	DoneLabel          string
+	Name               string
 }
 var repositoryConfig struct {
-	ProjectID int
+	ProjectID     int
 	StagingBranch string
 }
 

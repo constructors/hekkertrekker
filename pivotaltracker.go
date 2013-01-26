@@ -3,14 +3,14 @@ package main
 import (
 	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
-	"io/ioutil"
 	"strings"
 )
 
 type PivotalTracker struct {
-	Token string
+	Token     string
 	ProjectID int
 }
 
@@ -19,17 +19,17 @@ type ptStories struct {
 }
 
 type ptStory struct {
-	ID int `xml:"id"`
-	Estimate int `xml:"estimate"`
-	Name string `xml:"name"`
-	Type string `xml:"story_type"`
-	Labels string `xml:"labels"`
+	ID           int    `xml:"id"`
+	Estimate     int    `xml:"estimate"`
+	Name         string `xml:"name"`
+	Type         string `xml:"story_type"`
+	Labels       string `xml:"labels"`
 	CurrentState string `xml:"current_state"`
 }
 
 func (pt PivotalTracker) request(method string, path string) []byte {
 	url := fmt.Sprintf("http://www.pivotaltracker.com/services/v3/projects/%d/%s",
-	pt.ProjectID, path)
+		pt.ProjectID, path)
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
@@ -97,7 +97,7 @@ func (pt PivotalTracker) DoneStory(id int) bool {
 		bye("%v\n", err)
 	}
 
-	if (len(stories.Stories) == 0) {
+	if len(stories.Stories) == 0 {
 		return false
 	}
 

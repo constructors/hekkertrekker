@@ -1,9 +1,9 @@
 package main
 
 import (
-	"strings"
 	"bytes"
 	"os/exec"
+	"strings"
 )
 
 func hgCmd(arg ...string) string {

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
-	"bufio"
 	"strconv"
 	"strings"
 )
@@ -26,7 +26,7 @@ func accept() {
 	}
 
 	colors := map[string]int{
-		"bug": 91,
+		"bug":     91,
 		"feature": 92,
 	}
 	for i := range stories {
@@ -76,7 +76,7 @@ func accept() {
 func deliver() {
 	currentBranch := hgBranch()
 	currentBranchItems := strings.Split(currentBranch, "_")
-	currentStory, err := strconv.Atoi(currentBranchItems[len(currentBranchItems) - 1])
+	currentStory, err := strconv.Atoi(currentBranchItems[len(currentBranchItems)-1])
 
 	if err != nil || currentStory == 0 {
 		bye("This doesn't seem to be a story branch\n")
@@ -97,7 +97,7 @@ func deliver() {
 func done() {
 	currentBranch := hgBranch()
 	currentBranchItems := strings.Split(currentBranch, "_")
-	currentStory, err := strconv.Atoi(currentBranchItems[len(currentBranchItems) - 1])
+	currentStory, err := strconv.Atoi(currentBranchItems[len(currentBranchItems)-1])
 
 	if err != nil || currentStory == 0 {
 		bye("This doesn't seem to be a story branch\n")
@@ -129,9 +129,13 @@ func main() {
 	}
 
 	switch os.Args[1] {
-	case "accept": accept()
-	case "deliver": deliver()
-	case "done": done()
-	default: usage()
+	case "accept":
+		accept()
+	case "deliver":
+		deliver()
+	case "done":
+		done()
+	default:
+		usage()
 	}
 }
