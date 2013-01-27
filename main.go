@@ -92,6 +92,7 @@ func deliver() {
 	hgCommit(fmt.Sprintf(generalConfig.DeliverCommitMsg,
 		currentStory))
 	fmt.Printf("Pushing upstream...\n%s\n", hgPush())
+	hgUpdate(currentBranch)
 }
 
 func done() {
@@ -105,6 +106,8 @@ func done() {
 
 	fmt.Printf("Adding label...\n")
 	if pt.DoneStory(currentStory) {
+		fmt.Printf("Closing branch...\n")
+		hgCloseBranch(generalConfig.CloseCommitMsg)
 		fmt.Printf("Merging to branch default...\n")
 		hgUpdate("default")
 		hgMerge(currentBranch)
@@ -112,7 +115,7 @@ func done() {
 			currentStory))
 		fmt.Printf("Pushing upstream...\n%s\n", hgPush())
 	} else {
-		bye("This story isn't accepted yet!")
+		bye("This story isn't accepted yet!\n")
 	}
 }
 

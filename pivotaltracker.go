@@ -28,7 +28,7 @@ type ptStory struct {
 }
 
 func (pt PivotalTracker) request(method string, path string) []byte {
-	url := fmt.Sprintf("http://www.pivotaltracker.com/services/v3/projects/%d/%s",
+	url := fmt.Sprintf("https://www.pivotaltracker.com/services/v3/projects/%d/%s",
 		pt.ProjectID, path)
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, nil)

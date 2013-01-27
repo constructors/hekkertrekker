@@ -16,6 +16,7 @@ var generalConfig struct {
 	NewBranchCommitMsg string
 	DeliverCommitMsg   string
 	DoneCommitMsg      string
+	CloseCommitMsg     string
 	DoneLabel          string
 	Name               string
 }

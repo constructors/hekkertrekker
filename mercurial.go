@@ -40,6 +40,10 @@ func hgCommit(msg string) {
 	hgCmd("commit", "-m", msg)
 }
 
+func hgCloseBranch(msg string) {
+	hgCmd("commit", "--close-branch", "-m", msg)
+}
+
 func hgPush() string {
 	return hgCmd("push")
 }
