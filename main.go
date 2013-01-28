@@ -8,12 +8,14 @@ import (
 	"strings"
 )
 
+var commands = []string{"start", "deliver", "done"}
+
 func bye(format string, v ...interface{}) {
 	fmt.Fprintf(os.Stderr, format, v...)
 	os.Exit(1)
 }
 
-func accept() {
+func start() {
 	var selection int
 	var tryBranchName, branchName string
 
@@ -39,7 +41,7 @@ func accept() {
 	fmt.Scanf("%d", &selection)
 
 	if selection >= len(stories) || selection < 0 {
-		accept()
+		start()
 		return
 	}
 
@@ -120,10 +122,12 @@ func done() {
 }
 
 func usage() {
-	bye("Usage: %s [accept|deliver|done]\n", os.Args[0])
+	bye("Usage: %s [%s]\n", os.Args[0], strings.Join(commands, "|"))
 }
 
 func main() {
+	var matchedCommands []string
+
 	initConfig()
 	initPivotalTracker()
 
@@ -131,9 +135,19 @@ func main() {
 		usage()
 	}
 
-	switch os.Args[1] {
-	case "accept":
-		accept()
+	for i := range commands {
+		if strings.HasPrefix(commands[i], os.Args[1]) {
+			matchedCommands = append(matchedCommands, commands[i])
+		}
+	}
+
+	if len(matchedCommands) != 1 {
+		usage()
+	}
+
+	switch matchedCommands[0] {
+	case "start":
+		start()
 	case "deliver":
 		deliver()
 	case "done":

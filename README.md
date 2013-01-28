@@ -25,7 +25,7 @@ And in your source dir, also called `.hekkertrekker`:
 Usage
 -----
 
-* `ht accept` - Accepts a new story and creates a new branch.
+* `ht start` - Starts a new story and creates a new branch.
 * `ht deliver` - Delivers current branch and merges to staging.
 * `ht done` - Adds a tag to the story and merges to default.
 
